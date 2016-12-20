@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="css/home.css" rel="stylesheet">
+
+		<!--OPTIONAL "Raleway" font -->
+		<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+    </head>
+
+    <body>
+    	<!---
+		<div class="row" id="header">
+			<div class="col-1-5">
+				<div class="content">
+					<button>Button</button>
+                    <button>Button</button>
+				</div>
+			</div>
+            <div class="col-4-5">
+                <div class="content">
+                    <button>Button</button>
+                    <button>Button</button>
+                    <button>Button</button>	
+                    <button>Button</button>
+                </div>
+            </div>
+		</div>
+		-->
+        <div class="row">
+            <div class="col-1-1" id="title-area">
+                <div class="content" id="title">
+                    <h1>Title</h1>
+                    <p>Description</p>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="main-area-container">
+            <div class="col-1-1">
+                <div class="content" id="main-area">
+                	<form method="post">
+                		<input type="submit" formaction="/makeRoom" value="Create a room" autocomplete="off" id="create">
+                	</form>
+                	Or join an existing room
+                	<form method="post">
+                		<input type="text" name="joinRoomName" placeholder="Room code">
+                		<input type="submit" formaction="/joinRoom" value="Join" autocomplete="off" id="join">
+                	</form>
+                </div>
+            </div>
+        </div>
+    </body>                                       
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

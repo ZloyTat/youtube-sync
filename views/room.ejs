@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="css/room.css" rel="stylesheet">
+
+		<!--OPTIONAL "Raleway" font -->
+		<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="js/socket.io.js"></script>
+        <script>
+            var socket = io();
+
+        </script>
+    </head>
+
+    <body>
+    	<div class="row" id="header">
+    		<div class="col-1-1">
+    			<div class="content">
+    				Navbar
+    			</div>
+    		</div>
+    	</div>
+        <div class="row" id="body-container">
+            <div class="col-1-6" id="left-column">
+                Users
+                <ul id="user-list"></ul>
+            </div>
+            <div class="col-3-5" id="main-area">
+                <div class="content">
+                    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+                    <div id="player"></div>
+                    <!--
+                    <script>
+                        // 2. This code loads the IFrame Player API code asynchronously.
+                        var tag = document.createElement('script');
+
+                        tag.src = "https://www.youtube.com/iframe_api";
+                        var firstScriptTag = document.getElementsByTagName('script')[0];
+                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+                        // 3. This function creates an <iframe> (and YouTube player)
+                        //    after the API code downloads.
+                        var player;
+                        function onYouTubeIframeAPIReady() {
+                            player = new YT.Player('player', {
+                                height: '480',
+                                width: '900',
+                                videoId: 'M7lc1UVf-VE',
+                                events: {
+                                    'onReady': onPlayerReady,
+                                    'onStateChange': onPlayerStateChange
+                                }
+                            });
+                        }
+
+                        // 4. The API will call this function when the video player is ready.
+                        function onPlayerReady(event) {
+                            event.target.playVideo();
+                        }
+
+                        // 5. The API calls this function when the player's state changes.
+                        //    The function indicates that when playing a video (state=1),
+                        //    the player should play for six seconds and then stop.
+                        var done = false;
+                        function onPlayerStateChange(event) {
+                            if (event.data == YT.PlayerState.PLAYING && !done) {
+                                setTimeout(stopVideo, 6000);
+                                done = true;
+                            }
+                        }
+                        function stopVideo() {
+                            player.stopVideo();
+                        }
+                    </script>
+                    -->
+                </div>
+            </div>
+            <div class="col-custom" id="right-column">
+                <div class="row" id="chat-body">
+                    <ul id="messages"></ul>
+                </div>
+                <div class="row" id="chat-submit-container">
+                    <form id="chat-submit">
+                        <input type="text" placeholder="Message" autocomplete="off" id="chat-input">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="nameModal" class="modal">
+            <div class="modal-content">
+                <form id="name-submit">
+                    <input type="text" placeholder="Enter your name" autocomplete="off" id="name-input">
+                </form>
+            </div>
+        </div>
+
+        <script>
+            var modal = document.getElementById("nameModal");
+
+            // Initial prompt for a new user asking for their name
+            $('#name-submit').submit(function(){
+                modal.style.display = "none";
+                socket.emit("new-user", $("#name-input").val());
+                return false;
+            });
+
+            // Sending a client-side message
+            $('#chat-submit').submit(function(){
+                socket.emit("chat-submit", $("#chat-input").val());
+                $('#chat-input').val("");
+                return false;
+            });
+
+            // Receiving a new message
+            socket.on("new-message", function(msg){
+                $("#messages").append($('<li>').text(msg));
+            });
+
+            // Receiving an alert of a new connection
+            socket.on("add-user", function(user){
+                console.log("wtf");
+                $("#user-list").append($('<li>').text(user));
+            });
+        </script>
+    </body>
+</html>
