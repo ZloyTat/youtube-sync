@@ -162,7 +162,8 @@ li{
   overflow-y: auto;
   overflow-x: hidden;
   background-color: white;
-  word-wrap: break-word
+  word-wrap: break-word;
+  font-size: 22px;
 }
 #chat-submit-container{
   height: 5%;
@@ -173,7 +174,8 @@ li{
 #chat-input{
   width: 100%;
   height: 100%;
-  padding: 5px;
+  padding: 5px 10px;
+  font-size: 22px;
 }
 
 .modal{
@@ -220,4 +222,9 @@ li{
 
 #messages{
   margin: 10px 20px;
+}
+
+#user-list{
+  font-size: 25px;
+  margin: 15px 45px;
 }

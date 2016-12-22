@@ -160,7 +160,6 @@ io.on("connection", function(socket){
 
 				roomIndex = i;
 
-
 				rooms[roomIndex].people.push(user);
 				break;
 			}
@@ -172,7 +171,7 @@ io.on("connection", function(socket){
 	// When the server is alerted of a message being submitted
 	socket.on("chat-submit", function(data){
 		console.log("message: " + data.msg);
-		io.to(data.code).emit("update-messages", data.msg);
+		io.to(data.code).emit("update-messages", {user: data.user, msg: data.msg});
 	});
 
 	socket.on("disconnect", function(){

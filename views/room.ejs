@@ -25,7 +25,6 @@
     	</div>
         <div class="row" id="body-container">
             <div class="col-1-6" id="left-column">
-                Users
                 <div id="user-list"></div>
             </div>
             <div class="col-3-5" id="main-area">
@@ -122,7 +121,7 @@
 
                 var message = $("#chat-input").val();
 
-                socket.emit("chat-submit", {msg : message, code : roomCode});
+                socket.emit("chat-submit", {msg : message, code : roomCode, user : inputtedName});
                 $('#chat-input').val("");
 
                 return false;
@@ -130,8 +129,9 @@
 
 
             // Receiving a new message
-            socket.on("update-messages", function(msg){
-                $("#messages").append($('<div>').text(inputtedName + ": " + msg));
+            socket.on("update-messages", function(data){
+                $("#messages").append($('<div>').html("<strong>" + data.user + ": </strong> " + data.msg));
+                $('#chat-body').scrollTop = $('#chat-body').scrollHeight;
             });
 
             // Receiving an alert of a new connection
