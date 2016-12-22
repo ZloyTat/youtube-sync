@@ -7,8 +7,16 @@ var assert = require('assert');
 var http = require("http").Server(app);
 var io = require('socket.io')(http);
 
+// Custom object
+var Room = require('./libs/room.js');
+
 // Connection URL for Mongo
 var MongoURL = 'mongodb://localhost:27017/myproject';
+
+// List to keep track of active rooms
+var rooms = [];
+
+var userId = 0;
 
 //"public" folder is where express will grab static files
 app.use(express.static('public'));
@@ -25,8 +33,8 @@ app.get('/', function(req, res){
 });
 
 app.get(/^.room-\w\w\w\w\w$/, function(req, res){
-	console.log(req.originalUrl.substring(6,11));
 	code = req.originalUrl.substring(6, 11);
+	/*
 	MongoClient.connect(MongoURL, function(err, db){
 		assert.equal(null, err);
 		console.log("Connected successfully to server");
@@ -42,11 +50,22 @@ app.get(/^.room-\w\w\w\w\w$/, function(req, res){
 				res.status(404).send("Not found");
 			});
 	});
+	*/
+
+	// Iterate through the list of rooms to see if it exists
+	for(var i = 0; i < rooms.length; i++){
+		if(rooms[i].code === code){
+			res.render("room");
+			return;
+		}
+	}
+	res.status(404).send("Room does not exist");
 });
 
 // Create a new room
 app.post('/makeRoom', function(req, rs){
 	var newCode = generateRoomCode();
+	/*
 	// Use connect method to connect to the server
 	MongoClient.connect(MongoURL, function(err, db) {
 		assert.equal(null, err);
@@ -55,6 +74,12 @@ app.post('/makeRoom', function(req, rs){
 		});
 	rs.redirect('/room-' + newCode);
 	});
+	*/
+
+	// Create a new room and add it to the "rooms" list
+	rooms.push(new Room(newCode));
+
+	rs.redirect('/room-' + newCode)
 });
 
 // Join a room
@@ -63,9 +88,9 @@ app.post('/joinRoom', function(req, rs){
 });
 
 /*
-app.listen(3000, function(){
-	console.log('Listening on port 3000');
-});
+	app.listen(3000, function(){
+		console.log('Listening on port 3000');
+	});
 */
 
 function generateRoomCode(){
@@ -83,9 +108,8 @@ var insertDocuments = function(db, code, callback) {
 	// Get the documents collection
 	var collection = db.collection('rooms');
 	// Insert some documents
-	collection.insertMany([{room : code}], function(err, result) {
+	collection.insertMany([{room : code}, {users : ["default"]}], function(err, result){
 		assert.equal(err, null);
-		assert.equal(1, result.ops.length);
 		callback(result);
 	});
 }
@@ -110,16 +134,65 @@ http.listen(3000, function(){
 });
 
 io.on("connection", function(socket){
-	console.log("A user connected");
-	socket.on("new-user", function(user){
-		console.log("New user: " + user);
-		io.emit("add-user", user)
+
+	var user;
+
+	var roomIndex;
+	
+	// When the server is alerted of a new user's connection
+	socket.on("new-user", function(data){
+
+		user = {id : userId, name : data.user};
+		userId++;
+
+		// Broadcast to all clients that they must update their users list
+		socket.join(data.code);
+
+		// Retrieve the room in rooms list, then update its list of users
+
+		for(var i = 0; i < rooms.length; i++){
+			if(rooms[i].code === data.code){
+
+				// If the room has no master, set as this user
+				if(rooms[i].master === -1){
+					rooms[i].master = user.id;
+				}
+
+				roomIndex = i;
+
+
+				rooms[roomIndex].people.push(user);
+				break;
+			}
+		}
+
+		io.to(data.code).emit("update-users", rooms[roomIndex].people);
 	});
-	socket.on("chat-submit", function(msg){
-		console.log("message: " + msg);
-		io.emit("new-message", msg);
+
+	// When the server is alerted of a message being submitted
+	socket.on("chat-submit", function(data){
+		console.log("message: " + data.msg);
+		io.to(data.code).emit("update-messages", data.msg);
 	});
+
 	socket.on("disconnect", function(){
-		console.log("A user disconnected");
+
+		// Delete disconnected user from "people" list
+		if(user != null){
+			for(var i = 0; i < rooms[roomIndex].people.length; i++){
+				if(user.id === rooms[roomIndex].people[i].id){
+					console.log(user.id + " has disconnected" + "(" + user.name + ")");
+					rooms[roomIndex].people.splice(i, 1);
+					io.to(rooms[roomIndex].code).emit("update-users", rooms[roomIndex].people);
+				}
+			}
+		}
 	});
 });
+
+/*
+	
+	potential bugs:
+	- two rooms generating the same 5-digit code
+
+*/

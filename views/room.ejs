@@ -12,7 +12,6 @@
         <script src="js/socket.io.js"></script>
         <script>
             var socket = io();
-
         </script>
     </head>
 
@@ -27,13 +26,12 @@
         <div class="row" id="body-container">
             <div class="col-1-6" id="left-column">
                 Users
-                <ul id="user-list"></ul>
+                <div id="user-list"></div>
             </div>
             <div class="col-3-5" id="main-area">
                 <div class="content">
                     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
                     <div id="player"></div>
-                    <!--
                     <script>
                         // 2. This code loads the IFrame Player API code asynchronously.
                         var tag = document.createElement('script');
@@ -76,12 +74,11 @@
                             player.stopVideo();
                         }
                     </script>
-                    -->
                 </div>
             </div>
             <div class="col-custom" id="right-column">
                 <div class="row" id="chat-body">
-                    <ul id="messages"></ul>
+                    <div id="messages"></div>
                 </div>
                 <div class="row" id="chat-submit-container">
                     <form id="chat-submit">
@@ -93,7 +90,7 @@
         <div id="nameModal" class="modal">
             <div class="modal-content">
                 <form id="name-submit">
-                    <input type="text" placeholder="Enter your name" autocomplete="off" id="name-input">
+                    <input type="text" placeholder="Enter your name to begin" autocomplete="off" id="name-input">
                 </form>
             </div>
         </div>
@@ -101,29 +98,49 @@
         <script>
             var modal = document.getElementById("nameModal");
 
+            // Get the room code
+            var roomCode = window.location.href.slice(-5)
+
+            var inputtedName;
+
             // Initial prompt for a new user asking for their name
             $('#name-submit').submit(function(){
+
+                // Close the modal after they have submitted a name
                 modal.style.display = "none";
-                socket.emit("new-user", $("#name-input").val());
+
+
+                // Grab the string from the input field
+                inputtedName = $("#name-input").val();
+
+                socket.emit("new-user", {user : inputtedName, code : roomCode});
                 return false;
             });
 
             // Sending a client-side message
             $('#chat-submit').submit(function(){
-                socket.emit("chat-submit", $("#chat-input").val());
+
+                var message = $("#chat-input").val();
+
+                socket.emit("chat-submit", {msg : message, code : roomCode});
                 $('#chat-input').val("");
+
                 return false;
             });
 
+
             // Receiving a new message
-            socket.on("new-message", function(msg){
-                $("#messages").append($('<li>').text(msg));
+            socket.on("update-messages", function(msg){
+                $("#messages").append($('<div>').text(inputtedName + ": " + msg));
             });
 
             // Receiving an alert of a new connection
-            socket.on("add-user", function(user){
+            socket.on("update-users", function(people){
                 console.log("wtf");
-                $("#user-list").append($('<li>').text(user));
+                $("#user-list").html('');
+                for(var i = 0; i < people.length; i++){
+                    $("#user-list").append($('<div>').text(people[i].name));
+                }
             });
         </script>
     </body>

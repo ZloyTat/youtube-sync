@@ -114,6 +114,13 @@ body{
   */
 }
 
+ul{
+  list-style: none;
+}
+li{
+  margin: 0 0 10px 0;
+}
+
 .row{
   background-color: #EEEEEE;
   margin: 0 auto;
@@ -155,6 +162,7 @@ body{
   overflow-y: auto;
   overflow-x: hidden;
   background-color: white;
+  word-wrap: break-word
 }
 #chat-submit-container{
   height: 5%;
@@ -182,8 +190,34 @@ body{
 
 .modal-content{
   background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
+  top: 50%;
+  left: 50%;
   border: 1px solid #888;
+  width: 70%;
+  height: 30%;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  position: absolute;
+}
+
+#name-submit{
+  height: 100%;
+}
+
+#name-input{
+  height: 40%;
   width: 80%;
+  padding: 20px;
+  font-size: 40px;
+  top: 50%;
+  left: 50%;
+  border-style: solid;
+  border-color: #AAAAAA;
+  border-width: 1px;
+  transform: translate(-50%, -50%);
+  position: absolute;
+}
+
+#messages{
+  margin: 10px 20px;
 }
