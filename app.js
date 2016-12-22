@@ -161,19 +161,17 @@ io.on("connection", function(socket){
 
 				roomIndex = i;
 
-				console.log(user);
 				rooms[roomIndex].people.push(user);
 				break;
 			}
 		}
 
 		io.to(data.code).emit("update-users", rooms[roomIndex].people);
+		io.to(data.code).emit("connection-message", user.name);
 	});
 
 	// When the server is alerted of a message being submitted
 	socket.on("chat-submit", function(data){
-		console.log("message: " + data.msg);
-
 		var chatUsername = data.user;
 
 		// Add a "★" next to the master's chat messages
@@ -190,7 +188,7 @@ io.on("connection", function(socket){
 		if(user != null){
 			for(var i = 0; i < rooms[roomIndex].people.length; i++){
 				if(user.id === rooms[roomIndex].people[i].id){
-					console.log(user.id + " has disconnected" + "(" + user.name + ")");
+					var temp = rooms[roomIndex].people[i];
 					rooms[roomIndex].people.splice(i, 1);
 
 					// Set a new room master
@@ -204,8 +202,9 @@ io.on("connection", function(socket){
 						rooms[roomIndex].master = -1;
 					}
 
-					console.log(rooms[roomIndex].people);
 					io.to(rooms[roomIndex].code).emit("update-users", rooms[roomIndex].people);
+					io.to(rooms[roomIndex].code).emit("disconnection-message", temp.name);
+					break;
 				}
 			}
 		}

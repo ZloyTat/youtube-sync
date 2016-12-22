@@ -77,6 +77,9 @@
                 </div>
             </div>
             <div class="col-custom" id="right-column">
+                <div class="row" id="chat-header">
+                    Live chat
+                </div>
                 <div class="row" id="chat-body">
                     <div id="messages"></div>
                 </div>
@@ -97,6 +100,7 @@
 
         <script>
             var modal = document.getElementById("nameModal");
+            var notificationSfx = new Audio('sfx/blop-sfx.mp3');
 
             // Get the room code
             var roomCode = window.location.href.slice(-5)
@@ -135,18 +139,28 @@
                     $("#messages").append($('<div class="chat-message master">').html("<strong>" + data.user + ": </strong> " + data.msg));
                 else
                 $("#messages").append($('<div class="chat-message">').html("<strong>" + data.user + ": </strong> " + data.msg));
+                notificationSfx.play();
             });
 
             // Receiving an alert of a new connection
             socket.on("update-users", function(people){
-                console.log("wtf");
                 $("#user-list").html('');
                 for(var i = 0; i < people.length; i++){
                     $("#user-list").append($('<div class="online-users">').text(people[i].name));
-                    console.log("Append name??");
-                    console.log(people[i])
                 }
             });
+
+            // Receiving an alert of someone connecting
+            socket.on("connection-message", function(name){
+                $("#messages").append($('<div class="chat-message leaver">').html("<strong>" + name + " has joined the room</strong>"));
+            })
+
+            // Receiving an alert of someone disconnecting
+            socket.on("disconnection-message", function(name){
+                $("#messages").append($('<div class="chat-message leaver">').html("<strong>" + name + " has left the room</strong>"));
+            });
+
+            
         </script>
     </body>
 </html>
