@@ -2,16 +2,12 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var bodyParser = require('body-parser');
-var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var http = require("http").Server(app);
 var io = require('socket.io')(http);
 
 // Custom object
 var Room = require('./libs/room.js');
-
-// Connection URL for Mongo
-var MongoURL = 'mongodb://localhost:27017/myproject';
 
 // List to keep track of active rooms
 var rooms = [];
@@ -34,23 +30,6 @@ app.get('/', function(req, res){
 
 app.get(/^.room-\w\w\w\w\w$/, function(req, res){
 	code = req.originalUrl.substring(6, 11);
-	/*
-	MongoClient.connect(MongoURL, function(err, db){
-		assert.equal(null, err);
-		console.log("Connected successfully to server");
-		findDocument(db, code, 
-			// First callback if no error
-			function(){
-				db.close();
-				res.render("room");
-			},
-			// Second callback if there is an error
-			function(){
-				db.close();
-				res.status(404).send("Not found");
-			});
-	});
-	*/
 
 	// Iterate through the list of rooms to see if it exists
 	for(var i = 0; i < rooms.length; i++){
@@ -65,17 +44,7 @@ app.get(/^.room-\w\w\w\w\w$/, function(req, res){
 // Create a new room
 app.post('/makeRoom', function(req, rs){
 	var newCode = generateRoomCode();
-	/*
-	// Use connect method to connect to the server
-	MongoClient.connect(MongoURL, function(err, db) {
-		assert.equal(null, err);
-		insertDocuments(db, newCode, function() {
-			db.close();
-		});
-	rs.redirect('/room-' + newCode);
-	});
-	*/
-
+	
 	// Create a new room and add it to the "rooms" list
 	rooms.push(new Room(newCode));
 

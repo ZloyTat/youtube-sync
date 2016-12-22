@@ -231,10 +231,11 @@ p{
   left: 50%;
   border: 1px solid #888;
   width: 50%;
-  height: 15%;
+  height: 18%;
   text-align: center;
   transform: translate(-50%, -50%);
   position: absolute;
+  border-radius: 5px;
 }
 
 #name-submit{
@@ -242,10 +243,10 @@ p{
 }
 
 #name-input{
-  height: 60%;
+  height: 57%;
   width: 92%;
-  padding: 20px;
-  font-size: 40px;
+  padding: 15px 22px;
+  font-size: 32px;
   top: 50%;
   left: 50%;
   border-style: solid;
