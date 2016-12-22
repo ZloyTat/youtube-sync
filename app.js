@@ -156,10 +156,12 @@ io.on("connection", function(socket){
 				// If the room has no master, set as this user
 				if(rooms[i].master === -1){
 					rooms[i].master = user.id;
+					user.name = "★ " + user.name
 				}
 
 				roomIndex = i;
 
+				console.log(user);
 				rooms[roomIndex].people.push(user);
 				break;
 			}
@@ -171,7 +173,15 @@ io.on("connection", function(socket){
 	// When the server is alerted of a message being submitted
 	socket.on("chat-submit", function(data){
 		console.log("message: " + data.msg);
-		io.to(data.code).emit("update-messages", {user: data.user, msg: data.msg});
+
+		var chatUsername = data.user;
+
+		// Add a "★" next to the master's chat messages
+		if(rooms[roomIndex].master === user.id){
+			chatUsername = "★ " + data.user;
+		}
+
+		io.to(data.code).emit("update-messages", {user: chatUsername, msg: data.msg});
 	});
 
 	socket.on("disconnect", function(){
@@ -182,6 +192,19 @@ io.on("connection", function(socket){
 				if(user.id === rooms[roomIndex].people[i].id){
 					console.log(user.id + " has disconnected" + "(" + user.name + ")");
 					rooms[roomIndex].people.splice(i, 1);
+
+					// Set a new room master
+					if(rooms[roomIndex].people[0] != null){
+						if(rooms[roomIndex].people[0].id != rooms[roomIndex].master){
+							rooms[roomIndex].master = rooms[roomIndex].people[0].id;
+							rooms[roomIndex].people[0].name = "★ " + rooms[roomIndex].people[0].name;
+						}
+					}
+					else{
+						rooms[roomIndex].master = -1;
+					}
+
+					console.log(rooms[roomIndex].people);
 					io.to(rooms[roomIndex].code).emit("update-users", rooms[roomIndex].people);
 				}
 			}

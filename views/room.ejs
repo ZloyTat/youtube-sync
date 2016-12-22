@@ -25,9 +25,10 @@
     	</div>
         <div class="row" id="body-container">
             <div class="col-1-6" id="left-column">
+                <p>Users</p>
                 <div id="user-list"></div>
             </div>
-            <div class="col-3-5" id="main-area">
+            <div class="col-5-8" id="main-area">
                 <div class="content">
                     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
                     <div id="player"></div>
@@ -130,8 +131,10 @@
 
             // Receiving a new message
             socket.on("update-messages", function(data){
-                $("#messages").append($('<div>').html("<strong>" + data.user + ": </strong> " + data.msg));
-                $('#chat-body').scrollTop = $('#chat-body').scrollHeight;
+                if(data.user.substring(0,1) === "★")
+                    $("#messages").append($('<div class="chat-message master">').html("<strong>" + data.user + ": </strong> " + data.msg));
+                else
+                $("#messages").append($('<div class="chat-message">').html("<strong>" + data.user + ": </strong> " + data.msg));
             });
 
             // Receiving an alert of a new connection
@@ -139,7 +142,9 @@
                 console.log("wtf");
                 $("#user-list").html('');
                 for(var i = 0; i < people.length; i++){
-                    $("#user-list").append($('<div>').text(people[i].name));
+                    $("#user-list").append($('<div class="online-users">').text(people[i].name));
+                    console.log("Append name??");
+                    console.log(people[i])
                 }
             });
         </script>
