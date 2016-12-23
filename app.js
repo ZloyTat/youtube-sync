@@ -34,7 +34,7 @@ app.get(/^.room-\w\w\w\w\w$/, function(req, res){
 	// Iterate through the list of rooms to see if it exists
 	for(var i = 0; i < rooms.length; i++){
 		if(rooms[i].code === code){
-			res.render("room");
+			res.render("room", {title: "Room " + code});
 			return;
 		}
 	}
