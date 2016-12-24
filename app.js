@@ -31,6 +31,11 @@ app.get('/', function(req, res){
 	res.render('home');
 });
 
+// Listen to port 8080
+http.listen(port, function(){
+	console.log("listening on " + port);
+});
+
 app.get(/^.room-\w\w\w\w\w$/, function(req, res){
 	code = req.originalUrl.substring(6, 11);
 
@@ -50,7 +55,6 @@ app.post('/makeRoom', function(req, rs){
 	
 	// Create a new room and add it to the "rooms" list
 	rooms.push(new Room(newCode));
-
 	rs.redirect('/room-' + newCode)
 });
 
@@ -58,12 +62,6 @@ app.post('/makeRoom', function(req, rs){
 app.post('/joinRoom', function(req, rs){
 	rs.redirect('/room-' + req.body.joinRoomName);
 });
-
-/*
-	app.listen(3000, function(){
-		console.log('Listening on port 3000');
-	});
-*/
 
 function generateRoomCode(){
 	var code = "";
@@ -75,41 +73,24 @@ function generateRoomCode(){
 	return code;
 }
 
-// Database stuff
-var insertDocuments = function(db, code, callback) {
-	// Get the documents collection
-	var collection = db.collection('rooms');
-	// Insert some documents
-	collection.insertMany([{room : code}, {users : ["default"]}], function(err, result){
-		assert.equal(err, null);
-		callback(result);
-	});
-}
-
-var findDocument = function(db, code, successCallback, errorCallback){
-	// Get the documents collection
-	var collection = db.collection('rooms');
-	// Find some documents
-	collection.find({"room" : code}).toArray(function(err, docs){
-		if(docs.length != 0){
-			successCallback();
-		}
-		else{
-			errorCallback();
-		}
-	});
-}
-
-// Socket.io stuff
-http.listen(port, function(){
-	console.log("listening on " + port);
-});
 
 io.on("connection", function(socket){
 
 	var user;
 
-	var roomIndex;
+	var currentRoom;
+
+	// Returns the room code of the connected client
+	var getRoomCode = socket.handshake.query.roomCode;
+
+	for(var i = 0; i < rooms.length; i++){
+		if(rooms[i].code === getRoomCode){
+			currentRoom = rooms[i];
+			break;
+		}
+	}
+
+	socket.join(getRoomCode);
 	
 	// When the server is alerted of a new user's connection
 	socket.on("new-user", function(data){
@@ -117,28 +98,18 @@ io.on("connection", function(socket){
 		user = {id : userId, name : data.user};
 		userId++;
 
-		// Broadcast to all clients that they must update their users list
-		socket.join(data.code);
-
-		// Retrieve the room in rooms list, then update its list of users
-
-		for(var i = 0; i < rooms.length; i++){
-			if(rooms[i].code === data.code){
-
-				// If the room has no master, set as this user
-				if(rooms[i].master === -1){
-					rooms[i].master = user.id;
-					user.name = "★ " + user.name
-				}
-
-				roomIndex = i;
-
-				rooms[roomIndex].people.push(user);
-				break;
-			}
+		// If the room has no master, set as this user
+		if(rooms[i].master === -1){
+			rooms[i].master = user.id;
+			user.name = "★ " + user.name
 		}
+		// Update its list of users
+		currentRoom.people.push(user);
 
-		io.to(data.code).emit("update-users", rooms[roomIndex].people);
+		// Broadcast to all clients that they must update their users list
+		io.to(data.code).emit("update-users", currentRoom.people);
+
+		// Creates a chat message saying that someone has joined the room
 		io.to(data.code).emit("connection-message", user.name);
 	});
 
@@ -147,7 +118,7 @@ io.on("connection", function(socket){
 		var chatUsername = data.user;
 
 		// Add a "★" next to the master's chat messages
-		if(rooms[roomIndex].master === user.id){
+		if(currentRoom.master === user.id){
 			chatUsername = "★ " + data.user;
 		}
 
@@ -158,29 +129,41 @@ io.on("connection", function(socket){
 
 		// Delete disconnected user from "people" list
 		if(user != null){
-			for(var i = 0; i < rooms[roomIndex].people.length; i++){
-				if(user.id === rooms[roomIndex].people[i].id){
-					var temp = rooms[roomIndex].people[i];
-					rooms[roomIndex].people.splice(i, 1);
+			for(var i = 0; i < currentRoom.people.length; i++){
+				if(user.id === currentRoom.people[i].id){
+					var temp = currentRoom.people[i];
+					currentRoom.people.splice(i, 1);
 
 					// Set a new room master
-					if(rooms[roomIndex].people[0] != null){
-						if(rooms[roomIndex].people[0].id != rooms[roomIndex].master){
-							rooms[roomIndex].master = rooms[roomIndex].people[0].id;
-							rooms[roomIndex].people[0].name = "★ " + rooms[roomIndex].people[0].name;
+					if(currentRoom.people[0] != null){
+						if(currentRoom.people[0].id != currentRoom.master){
+							currentRoom.master = currentRoom.people[0].id;
+							currentRoom.people[0].name = "★ " + currentRoom.people[0].name;
 						}
 					}
+					// If the room is empty, set master to -1
 					else{
-						rooms[roomIndex].master = -1;
+						currentRoom.master = -1;
 					}
 
-					io.to(rooms[roomIndex].code).emit("update-users", rooms[roomIndex].people);
-					io.to(rooms[roomIndex].code).emit("disconnection-message", temp.name);
+					io.to(currentRoom.code).emit("update-users", currentRoom.people);
+					io.to(currentRoom.code).emit("disconnection-message", temp.name);
 					break;
 				}
 			}
 		}
 	});
+
+	// A client paused the video
+	socket.on("pause-player", function(){
+		io.to(currentRoom.code).emit("set-player-state-paused");
+	});
+
+	// A client unpaused the video / the video is already playing
+	socket.on("play-player", function(){
+		io.to(currentRoom.code).emit("set-player-state-play");
+	});
+
 });
 
 /*

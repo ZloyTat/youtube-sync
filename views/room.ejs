@@ -11,7 +11,9 @@
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
         <script src="js/socket.io.js"></script>
         <script>
-            var socket = io();
+            // Get the room code
+            var roomCode = window.location.href.slice(-5)
+            var socket = io("", { query: "roomCode="+roomCode });
         </script>
         <title><%=title%></title>
     </head>
@@ -30,25 +32,27 @@
                 <div id="user-list"></div>
             </div>
             <div class="col-5-8" id="main-area">
-                <div class="content">
-                    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-                    <div id="player"></div>
-                    <script>
-                        // 2. This code loads the IFrame Player API code asynchronously.
+                <div class="row">
+
+                    <!-- The <iframe> (and video player) will replace this <div> tag. -->
+                    <div id="iframe-wrapper">
+                        <div id="player"></div>
+                    </div>
+
+                    <script id="youtube-embed">
+                        // This code loads the IFrame Player API code asynchronously.
                         var tag = document.createElement('script');
 
                         tag.src = "https://www.youtube.com/iframe_api";
-                        var firstScriptTag = document.getElementsByTagName('script')[0];
+                        var firstScriptTag = document.getElementById('youtube-embed');
                         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-                        // 3. This function creates an <iframe> (and YouTube player)
-                        //    after the API code downloads.
                         var player;
                         function onYouTubeIframeAPIReady() {
                             player = new YT.Player('player', {
-                                height: '480',
-                                width: '900',
-                                videoId: 'M7lc1UVf-VE',
+                                height: '315',
+                                width: '560',
+                                videoId: 'blankvid',
                                 events: {
                                     'onReady': onPlayerReady,
                                     'onStateChange': onPlayerStateChange
@@ -56,19 +60,20 @@
                             });
                         }
 
-                        // 4. The API will call this function when the video player is ready.
                         function onPlayerReady(event) {
-                            event.target.playVideo();
                         }
 
-                        // 5. The API calls this function when the player's state changes.
+                        //    The API calls this function when the player's state changes.
                         //    The function indicates that when playing a video (state=1),
                         //    the player should play for six seconds and then stop.
-                        var done = false;
                         function onPlayerStateChange(event) {
-                            if (event.data == YT.PlayerState.PLAYING && !done) {
-                                setTimeout(stopVideo, 6000);
-                                done = true;
+                            switch(event.data){
+                                case YT.PlayerState.PAUSED:
+                                    socket.emit("pause-player")
+                                    break;
+                                case YT.PlayerState.PLAYING:
+                                    socket.emit("play-player")
+                                    break;
                             }
                         }
                         function stopVideo() {
@@ -103,9 +108,6 @@
             var modal = document.getElementById("nameModal");
             var notificationSfx = new Audio('sfx/blop-sfx.mp3');
 
-            // Get the room code
-            var roomCode = window.location.href.slice(-5)
-
             var inputtedName;
 
             // Initial prompt for a new user asking for their name
@@ -127,8 +129,11 @@
 
                 var message = $("#chat-input").val();
 
-                socket.emit("chat-submit", {msg : message, code : roomCode, user : inputtedName});
-                $('#chat-input').val("");
+                // Prevent entering blank messages
+                if(message.length > 0){
+                    socket.emit("chat-submit", {msg : message, code : roomCode, user : inputtedName});
+                    $('#chat-input').val("");
+                }
 
                 return false;
             });
@@ -161,6 +166,16 @@
                 $("#messages").append($('<div class="chat-message leaver">').html("<strong>" + name + " has left the room</strong>"));
             });
 
+            
+            // Pause the video when someone else in the room pauses
+            socket.on("set-player-state-paused", function(){
+                player.pauseVideo();
+            });
+
+            // Play the video when someone else in the room pauses
+            socket.on("set-player-state-play", function(){
+                player.playVideo();
+            });
             
         </script>
     </body>
