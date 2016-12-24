@@ -99,8 +99,8 @@ io.on("connection", function(socket){
 		userId++;
 
 		// If the room has no master, set as this user
-		if(rooms[i].master === -1){
-			rooms[i].master = user.id;
+		if(currentRoom.master === -1){
+			currentRoom.master = user.id;
 			user.name = "★ " + user.name
 		}
 		// Update its list of users
@@ -156,19 +156,50 @@ io.on("connection", function(socket){
 
 	// A client paused the video
 	socket.on("pause-player", function(){
-		io.to(currentRoom.code).emit("set-player-state-paused");
+		if(currentRoom != undefined){
+			// Video state 2 == PAUSED
+			currentRoom.videoState = 2;
+			io.to(currentRoom.code).emit("set-player-state-paused");
+			console.log("puased");
+		}
 	});
 
 	// A client unpaused the video / the video is already playing
 	socket.on("play-player", function(){
-		io.to(currentRoom.code).emit("set-player-state-play");
+		if(currentRoom != undefined){
+			// Video state 1 == PLAYING
+			currentRoom.videoState = 1;
+			io.to(currentRoom.code).emit("set-player-state-play");
+			console.log("played");
+		}
 	});
 
 	// A client has changed the video
 	socket.on("change-video", function(id){
-		io.to(currentRoom.code).emit("update-video", id);
 		currentRoom.currentVideo = id;
+		io.to(currentRoom.code).emit("update-video", {videoId : id, currentTime : 0, state : 1});
 	});
+
+	// When a client joins a room, it will get the currently playing video.
+	socket.on("set-video", function(){
+		if(currentRoom != undefined)
+			socket.emit("update-video", {videoId : currentRoom.currentVideo, currentTime : currentRoom.videoTime, state : currentRoom.videoState});
+	})
+
+	// Updates the video time whenever a client seeks
+	socket.on("seek-video", function(time){
+		if(currentRoom != undefined)
+			io.to(currentRoom.code).emit("update-currentTime", time);
+	});
+
+    // Updates the room's video time, so new clients joining the room will start at the correct time
+    socket.on("update-room-time", function(time){
+    	if(currentRoom != undefined){
+    		currentRoom.videoTime = time;
+    		console.log(currentRoom.videoState);
+    	}
+
+    });
 });
 
 /*

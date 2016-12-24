@@ -59,9 +59,39 @@
                                     'onStateChange': onPlayerStateChange
                                 }
                             });
+
                         }
 
                         function onPlayerReady(event) {
+                            // Sets the video
+                            socket.emit("set-video");
+                            var previousTime = -1;
+                            var interval = 1000;
+
+                            // This function detects any "seek" events, then informs the server if it does happen
+                            var checkTime = function(){
+                                var currentTime = player.getCurrentTime();
+
+                                if(previousTime > -1){
+                                    if(Math.abs(currentTime - previousTime) > 1.1){
+                                        socket.emit("seek-video", currentTime);
+                                    }
+                                }
+                                previousTime = player.getCurrentTime();
+
+                                // Updates the room's video time, so new clients joining the room will start at the correct time
+                                socket.emit("update-room-time", currentTime);
+
+                                if($('#video-title').val() != player.getVideoData().title){
+                                    console.log("yes?");
+                                    console.log(player.getVideoData().title);
+                                    $('#video-title').text(player.getVideoData().title);
+                                }
+                                
+                                setTimeout(checkTime, interval);
+                            }
+
+                            checkTime();
                         }
                         //    The API calls this function when the player's state changes.
                         //    The function indicates that when playing a video (state=1),
@@ -72,25 +102,23 @@
                                     socket.emit("pause-player")
                                     break;
                                 case YT.PlayerState.PLAYING:
-                                    socket.emit("play-player")
+                                    socket.emit("play-player");
                                     break;
                             }
                         }
                         function stopVideo() {
                             player.stopVideo();
                         }
-
                     </script>
                 </div>
                 <div class="row">
                     <div class="col-4-5">
-                        <div class="content">
-                            title
+                        <div class="content" id="video-title">
+                            
                         </div>
                     </div>
                     <div class="col-1-5">
                         <div class="content">
-                            thumbs
                         </div>
                     </div>
                 </div>
@@ -197,18 +225,26 @@
             
             // Pause the video when someone else in the room pauses
             socket.on("set-player-state-paused", function(){
-                player.pauseVideo();
+                if(player.getPlayerState() != 2)
+                    player.pauseVideo();
             });
 
-            // Play the video when someone else in the room pauses
+            // Play the video when someone else in the room plays
             socket.on("set-player-state-play", function(){
-                player.playVideo();
+                if(player.getPlayerState() != 1)
+                    player.playVideo();
             });
 
             // Update the video if it changes
-            socket.on("update-video", function(id){
-                player.loadVideoById(id, 0);
+            socket.on("update-video", function(data){
+                player.cueVideoById(data.videoId, data.currentTime);
             });
+
+            // Update the video's time when someone seeks
+            socket.on("update-currentTime", function(time){
+                player.seekTo(time, true);
+            })
+
             
         </script>
     </body>
