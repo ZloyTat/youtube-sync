@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var assert = require('assert');
 var http = require("http").Server(app);
 var io = require('socket.io')(http);
+var port = process.env.PORT || 8080;
 
 // Custom object
 var Room = require('./libs/room.js');
@@ -98,8 +99,8 @@ var findDocument = function(db, code, successCallback, errorCallback){
 }
 
 // Socket.io stuff
-http.listen(3000, function(){
-	console.log("listening on :3000");
+http.listen(port, function(){
+	console.log("listening on " + port);
 });
 
 io.on("connection", function(socket){
