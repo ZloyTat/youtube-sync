@@ -49,10 +49,11 @@
 
                         var player;
                         function onYouTubeIframeAPIReady() {
+                            
                             player = new YT.Player('player', {
                                 height: '315',
                                 width: '560',
-                                videoId: 'blankvid',
+                                videoId: 'blankVideo',
                                 events: {
                                     'onReady': onPlayerReady,
                                     'onStateChange': onPlayerStateChange
@@ -62,7 +63,6 @@
 
                         function onPlayerReady(event) {
                         }
-
                         //    The API calls this function when the player's state changes.
                         //    The function indicates that when playing a video (state=1),
                         //    the player should play for six seconds and then stop.
@@ -79,7 +79,25 @@
                         function stopVideo() {
                             player.stopVideo();
                         }
+
                     </script>
+                </div>
+                <div class="row">
+                    <div class="col-4-5">
+                        <div class="content">
+                            title
+                        </div>
+                    </div>
+                    <div class="col-1-5">
+                        <div class="content">
+                            thumbs
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <form id="link-submit">
+                        <input type="text" placeholder="Enter a YouTube link" autocomplete="off" id="link-input">
+                    </form>
                 </div>
             </div>
             <div class="col-custom" id="right-column">
@@ -109,7 +127,6 @@
             var notificationSfx = new Audio('sfx/blop-sfx.mp3');
 
             var inputtedName;
-
             // Initial prompt for a new user asking for their name
             $('#name-submit').submit(function(){
 
@@ -137,6 +154,17 @@
 
                 return false;
             });
+
+            // Submitting a YouTube link
+            $('#link-submit').submit(function(){
+
+                var videoId = $('#link-input').val().slice(-11);
+
+                socket.emit("change-video", videoId);
+
+                $('#link-input').val("");
+                return false;
+            })
 
 
             // Receiving a new message
@@ -175,6 +203,11 @@
             // Play the video when someone else in the room pauses
             socket.on("set-player-state-play", function(){
                 player.playVideo();
+            });
+
+            // Update the video if it changes
+            socket.on("update-video", function(id){
+                player.loadVideoById(id, 0);
             });
             
         </script>

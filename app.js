@@ -164,6 +164,11 @@ io.on("connection", function(socket){
 		io.to(currentRoom.code).emit("set-player-state-play");
 	});
 
+	// A client has changed the video
+	socket.on("change-video", function(id){
+		io.to(currentRoom.code).emit("update-video", id);
+		currentRoom.currentVideo = id;
+	});
 });
 
 /*
