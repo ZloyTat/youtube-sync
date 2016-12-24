@@ -5,6 +5,8 @@ var bodyParser = require('body-parser');
 var assert = require('assert');
 var http = require("http").Server(app);
 var io = require('socket.io')(http);
+
+// process.env.PORT lets the port be set by Heroku
 var port = process.env.PORT || 8080;
 
 // Custom object
