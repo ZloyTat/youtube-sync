@@ -24,6 +24,9 @@
 .col-1-6{
   width: 16.667%;
 }
+.col-5-6{
+  width: 83.3%;
+}
 .col-1-8{
   width: 12.5%;
 }
@@ -129,7 +132,7 @@ li{
 #header{
   border-bottom: solid;
   border-color: #AAAAAA;
-  border-width: 1px;
+  border-width: 0px;
 }
 
 #body-container{
@@ -144,11 +147,6 @@ li{
   border-color: #AAAAAA;
   height: 100%;
   border-width: 1px;
-}
-p{
-  margin: 25px 45px 15px 45px;
-  font-weight: bolder;
-  font-size: 20px;
 }
 
 #right-column{
@@ -180,6 +178,7 @@ p{
   padding: 5px 10px;
   font-family: 'Raleway', sans-serif;
   font-size: 16px;
+  border-style: none;
 }
 #chat-header{
   height: 5%;
@@ -206,7 +205,7 @@ p{
 }
 
 #user-list{
-  margin: 15px 45px;
+  margin: 15px 12%;
 }
 .online-users{
   margin: 8px 0px;
@@ -273,11 +272,27 @@ p{
   height: 100%;
 }
 #link-submit{
-  text-align: center;
+  padding-top: .5%;
 }
 #link-input{
   padding: 5px 10px;
   font-size: 16px;
-  width: 75%;
+  width: 75.07%;
   height: 45px;
+}
+#users-column{
+  height: 35%;
+  border-bottom-style: solid;
+  border-width: 1px;
+  border-color: #AAAAAA;
+  overflow-y: auto;
+}
+#users-list-header{
+  font-size: 24px;
+  background-color: #AAAAAA;
+  font-weight: bolder;
+  padding: 2% 0% 2% 10%;
+}
+#video-title{
+  font-size: 22px;
 }

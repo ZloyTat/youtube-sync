@@ -38,7 +38,6 @@ http.listen(port, function(){
 
 app.get(/^.room-\w\w\w\w\w$/, function(req, res){
 	code = req.originalUrl.substring(6, 11);
-
 	// Iterate through the list of rooms to see if it exists
 	for(var i = 0; i < rooms.length; i++){
 		if(rooms[i].code === code){
@@ -75,10 +74,11 @@ function generateRoomCode(){
 
 
 io.on("connection", function(socket){
-
 	var user;
 
 	var currentRoom;
+
+	var roomIndex;
 
 	// Returns the room code of the connected client
 	var getRoomCode = socket.handshake.query.roomCode;
@@ -86,10 +86,10 @@ io.on("connection", function(socket){
 	for(var i = 0; i < rooms.length; i++){
 		if(rooms[i].code === getRoomCode){
 			currentRoom = rooms[i];
+			roomIndex = i;
 			break;
 		}
 	}
-
 	socket.join(getRoomCode);
 	
 	// When the server is alerted of a new user's connection
@@ -152,6 +152,10 @@ io.on("connection", function(socket){
 				}
 			}
 		}
+		// Destroy the room if there is no one else in it.
+		if(currentRoom.people.length===0){
+			rooms.splice(roomIndex, 1);
+		}
 	});
 
 	// A client paused the video
@@ -160,7 +164,6 @@ io.on("connection", function(socket){
 			// Video state 2 == PAUSED
 			currentRoom.videoState = 2;
 			io.to(currentRoom.code).emit("set-player-state-paused");
-			console.log("puased");
 		}
 	});
 
@@ -170,14 +173,15 @@ io.on("connection", function(socket){
 			// Video state 1 == PLAYING
 			currentRoom.videoState = 1;
 			io.to(currentRoom.code).emit("set-player-state-play");
-			console.log("played");
 		}
 	});
 
 	// A client has changed the video
 	socket.on("change-video", function(id){
-		currentRoom.currentVideo = id;
-		io.to(currentRoom.code).emit("update-video", {videoId : id, currentTime : 0, state : 1});
+		if(currentRoom != undefined){
+			currentRoom.currentVideo = id;
+			io.to(currentRoom.code).emit("update-video", {videoId : id, currentTime : 0, state : 1});
+		}
 	});
 
 	// When a client joins a room, it will get the currently playing video.
@@ -196,7 +200,6 @@ io.on("connection", function(socket){
     socket.on("update-room-time", function(time){
     	if(currentRoom != undefined){
     		currentRoom.videoTime = time;
-    		console.log(currentRoom.videoState);
     	}
 
     });
@@ -206,5 +209,10 @@ io.on("connection", function(socket){
 	
 	potential bugs:
 	- two rooms generating the same 5-digit code
-
+	
+	known bug***:
+	- If you're the LAST user in the room, and you leave the room, the room is deleted as expected. But if
+	you ctrl shift tab to bring back the window, the browser does not send a GET request to the server, so there
+	is no 404 error as there should be. The app then breaks because it makes a socket connection, but "currentRoom"
+	will be undefined.
 */
