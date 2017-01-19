@@ -152,9 +152,19 @@ io.on("connection", function(socket){
 				}
 			}
 		}
-		// Destroy the room if there is no one else in it.
-		if(currentRoom.people.length===0){
-			rooms.splice(roomIndex, 1);
+		/* 
+			Destroy the room if there is no one else in it after a certain amount of time.
+			This "currentRoom != null" is only necessary for testing, because the app crashes when you shut down
+			and restart the server while you're in a room since "currentRoom" will be null in that situation.
+		*/
+		if(currentRoom != null){
+
+			// Delete the room if it's empty for 10 seconds
+			setTimeout(function(){
+				if(currentRoom.people.length===0){
+					rooms.splice(roomIndex, 1);
+				}
+			}, 10000);
 		}
 	});
 
@@ -209,10 +219,4 @@ io.on("connection", function(socket){
 	
 	potential bugs:
 	- two rooms generating the same 5-digit code
-	
-	known bug***:
-	- If you're the LAST user in the room, and you leave the room, the room is deleted as expected. But if
-	you ctrl shift tab to bring back the window, the browser does not send a GET request to the server, so there
-	is no 404 error as there should be. The app then breaks because it makes a socket connection, but "currentRoom"
-	will be undefined.
 */

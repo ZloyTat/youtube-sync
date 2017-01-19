@@ -81,7 +81,8 @@
                                 var currentTime = player.getCurrentTime();
 
                                 if(previousTime > -1){
-                                    if(Math.abs(currentTime - previousTime) > 1.1){
+                                    if(Math.abs(currentTime - previousTime) > 2){
+                                        console.log("Seek happened");
                                         socket.emit("seek-video", currentTime);
                                     }
                                 }
@@ -90,9 +91,7 @@
                                 // Updates the room's video time, so new clients joining the room will start at the correct time
                                 socket.emit("update-room-time", currentTime);
 
-                                if($('#video-title').val() != player.getVideoData().title){
-                                    console.log("yes?");
-                                    console.log(player.getVideoData().title);
+                                if($('#video-title').html() != player.getVideoData().title){
                                     $('#video-title').text(player.getVideoData().title);
                                 }
                                 
