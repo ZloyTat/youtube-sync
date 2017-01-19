@@ -163,6 +163,7 @@ io.on("connection", function(socket){
 			setTimeout(function(){
 				if(currentRoom.people.length===0){
 					rooms.splice(roomIndex, 1);
+					console.log("Room deleted");
 				}
 			}, 10000);
 		}

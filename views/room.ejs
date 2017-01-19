@@ -22,7 +22,7 @@
     	<div class="row" id="header">
     		<div class="col-1-6">
     			<div class="content">
-                    Navbar
+                    
     			</div>
     		</div>
             <div class="col-5-6">
@@ -82,7 +82,6 @@
 
                                 if(previousTime > -1){
                                     if(Math.abs(currentTime - previousTime) > 2){
-                                        console.log("Seek happened");
                                         socket.emit("seek-video", currentTime);
                                     }
                                 }
@@ -211,14 +210,11 @@
                 for(var i = 0; i < people.length; i++){
                     $("#user-list").append($('<div class="online-users">').text(people[i].name));
                 }
-                console.log("??");
                 // User count update
                 if(people.length == 1){
-                    console.log("?qweqw?");
                     $('#users-list-header').text(people.length + " user");
                 }
                 else{
-                    console.log("?1231?");
                     $('#users-list-header').text(people.length + " users");
                 }
             });
