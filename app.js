@@ -86,6 +86,7 @@ io.on("connection", function(socket){
 	for(var i = 0; i < rooms.length; i++){
 		if(rooms[i].code === getRoomCode){
 			currentRoom = rooms[i];
+			console.log(currentRoom);
 			roomIndex = i;
 			break;
 		}
