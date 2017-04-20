@@ -17,8 +17,8 @@ var rooms = [];
 
 var userId = 0;
 
-//"public" folder is where express will grab static files
-app.use(express.static('public'));
+//"client" folder is where express will grab static files
+app.use(express.static('client'));
 app.use(bodyParser.urlencoded({extended: false}));
 
 //Folder in which express will grab templates
@@ -216,9 +216,3 @@ io.on("connection", function(socket){
 
     });
 });
-
-/*
-	
-	potential bugs:
-	- two rooms generating the same 5-digit code
-*/

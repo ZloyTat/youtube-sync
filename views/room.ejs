@@ -3,13 +3,13 @@
 	<head>
 	    <meta charset="utf-8">
 	    <meta name="viewport" content="width=device-width, initial-scale=1">
-		<link href="css/room.css" rel="stylesheet">
+		<link href="stylesheets/room.css" rel="stylesheet">
 
 		<!--OPTIONAL "Raleway" font -->
 		<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
 
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-        <script src="js/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
         <script>
             // Get the room code
             var roomCode = window.location.href.slice(-5)
@@ -44,7 +44,7 @@
 
                     <script id="youtube-embed">
                     </script>
-                    <script src='js/youtube-player.js'></script>
+                    <script src='room/youtube-player.js'></script>
                 </div>
                 <div class="row" id="video-info">
                     <div class="col-1-1">
@@ -76,6 +76,6 @@
             </div>
         </div>
 
-        <script src='js/socket-events.js'></script>
+        <script src='room/socket-events.js'></script>
     </body>
 </html>
