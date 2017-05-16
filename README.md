@@ -14,10 +14,10 @@ Features
 Screenshots
 ---
 Home page
-![Main Screen](https://s3.amazonaws.com/poly-screenshots.angel.co/Project/24/503446/2e471ecdc2c34ab60335d9d3935131ba-original.png)
+![Main Screen](https://cloud.githubusercontent.com/assets/10242137/26124149/759fbfe4-3a4b-11e7-81a5-e62fd678694d.png)
 
 Room
-![Room](https://s3.amazonaws.com/poly-screenshots.angel.co/Project/24/503446/07f3387b5809b284052cbb8124477098-original.png)
+![Room](https://cloud.githubusercontent.com/assets/10242137/26124472/891f4afc-3a4c-11e7-88ed-c66b57ea4562.png)
 
 Install
 ---
